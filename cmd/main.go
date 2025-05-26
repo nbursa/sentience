@@ -13,6 +13,7 @@ import (
 func main() {
 	fmt.Println("Sentience REPL v0.1")
 	scanner := bufio.NewScanner(os.Stdin)
+	ctx := runtime.NewAgentContext()
 
 	for {
 		fmt.Print(">>> ")
@@ -28,6 +29,7 @@ func main() {
 		lexer := parser.NewLexer(line)
 		p := parser.NewParser(lexer)
 		program := p.ParseProgram()
-		runtime.Eval(program, "")
+		runtime.Eval(program, "", ctx)
+		fmt.Println("MEM:", ctx.MemShort)
 	}
 }
