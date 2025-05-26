@@ -18,6 +18,10 @@ func (p *Program) TokenLiteral() string {
 	return ""
 }
 
+func (p *Program) String() string {
+	return "[program]"
+}
+
 type Statement interface {
 	Node
 	statementNode()
@@ -59,3 +63,19 @@ type OnInputStatement struct {
 func (o *OnInputStatement) statementNode()       {}
 func (o *OnInputStatement) TokenLiteral() string { return "on" }
 func (o *OnInputStatement) String() string       { return "on input(" + o.Param + ")" }
+
+type ReflectStatement struct {
+	Body []Statement
+}
+
+func (r *ReflectStatement) statementNode()       {}
+func (r *ReflectStatement) TokenLiteral() string { return "reflect" }
+func (r *ReflectStatement) String() string       { return "reflect { ... }" }
+
+type TrainStatement struct {
+	Body []Statement
+}
+
+func (t *TrainStatement) statementNode()       {}
+func (t *TrainStatement) TokenLiteral() string { return "train" }
+func (t *TrainStatement) String() string       { return "train { ... }" }

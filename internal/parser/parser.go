@@ -49,6 +49,10 @@ func (p *Parser) parseStatement() types.Statement {
 		return p.parseMemStatement()
 	case ON:
 		return p.parseOnInputStatement()
+	case REFLECT:
+		return p.parseReflectStatement()
+	case TRAIN:
+		return p.parseTrainStatement()
 	default:
 		return nil
 	}
@@ -116,6 +120,50 @@ func (p *Parser) parseOnInputStatement() types.Statement {
 	if p.curToken.Type != RPAREN {
 		return nil
 	}
+
+	p.nextToken() // expect {
+	if p.curToken.Type != LBRACE {
+		return nil
+	}
+
+	stmt.Body = []types.Statement{}
+	p.nextToken()
+
+	for p.curToken.Type != RBRACE && p.curToken.Type != EOF {
+		bodyStmt := p.parseStatement()
+		if bodyStmt != nil {
+			stmt.Body = append(stmt.Body, bodyStmt)
+		}
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseReflectStatement() types.Statement {
+	stmt := &types.ReflectStatement{}
+
+	p.nextToken() // expect {
+	if p.curToken.Type != LBRACE {
+		return nil
+	}
+
+	stmt.Body = []types.Statement{}
+	p.nextToken()
+
+	for p.curToken.Type != RBRACE && p.curToken.Type != EOF {
+		bodyStmt := p.parseStatement()
+		if bodyStmt != nil {
+			stmt.Body = append(stmt.Body, bodyStmt)
+		}
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseTrainStatement() types.Statement {
+	stmt := &types.TrainStatement{}
 
 	p.nextToken() // expect {
 	if p.curToken.Type != LBRACE {
