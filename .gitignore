@@ -1,0 +1,18 @@
+# build artifacts
+*.exe
+*.out
+*.test
+
+# Go cache
+*.log
+*.tmp
+
+# runtime state
+ctx.json
+*.json
+
+# editor/IDE files
+.vscode/
+.idea/
+.DS_Store
+*.swp

@@ -1,5 +1,10 @@
 package runtime
 
+import (
+	"encoding/json"
+	"os"
+)
+
 type AgentContext struct {
 	MemShort map[string]string
 	MemLong  map[string]string
@@ -29,4 +34,20 @@ func (ctx *AgentContext) GetMem(target string, key string) string {
 		return ctx.MemLong[key]
 	}
 	return ""
+}
+
+func (ctx *AgentContext) Save(path string) error {
+	data, err := json.MarshalIndent(ctx, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
+}
+
+func (ctx *AgentContext) Load(path string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, ctx)
 }
