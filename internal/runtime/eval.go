@@ -50,6 +50,15 @@ func Eval(node types.Node, indent string) {
 	case *types.LinkStatement:
 		fmt.Printf("%sLink: %s <-> %s\n", indent, n.From, n.To)
 
+	case *types.IfStatement:
+		fmt.Printf("%sIf: %s\n", indent, n.Condition)
+		for _, stmt := range n.Body {
+			Eval(stmt, indent+"  ")
+		}
+
+	case *types.EnterStatement:
+		fmt.Printf("%sEnter: %s\n", indent, n.Target)
+
 	default:
 		fmt.Printf("%sUnknown node: %T\n", indent, n)
 	}

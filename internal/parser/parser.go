@@ -61,6 +61,10 @@ func (p *Parser) parseStatement() types.Statement {
 		return p.parseEmbedStatement()
 	case LINK:
 		return p.parseLinkStatement()
+	case IF:
+		return p.parseIfStatement()
+	case ENTER:
+		return p.parseEnterStatement()
 	default:
 		return nil
 	}
@@ -270,4 +274,75 @@ func (p *Parser) parseLinkStatement() types.Statement {
 	stmt.To = p.curToken.Literal
 
 	return stmt
+}
+
+func (p *Parser) parseIfStatement() types.Statement {
+	stmt := &types.IfStatement{}
+
+	p.nextToken() // grab condition start
+	condParts := []string{}
+	for p.curToken.Type != LBRACE && p.curToken.Type != EOF {
+		lit := p.curToken.Literal
+
+		// restore quotes for STRING token
+		if p.curToken.Type == STRING {
+			lit = `"` + lit + `"`
+		}
+
+		condParts = append(condParts, lit)
+		p.nextToken()
+	}
+
+	stmt.Condition = smartJoin(condParts)
+
+	if p.curToken.Type != LBRACE {
+		return nil
+	}
+
+	stmt.Body = []types.Statement{}
+	p.nextToken()
+
+	for p.curToken.Type != RBRACE && p.curToken.Type != EOF {
+		bodyStmt := p.parseStatement()
+		if bodyStmt != nil {
+			stmt.Body = append(stmt.Body, bodyStmt)
+		}
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseEnterStatement() types.Statement {
+	stmt := &types.EnterStatement{}
+
+	p.nextToken()
+	if p.curToken.Type != IDENT {
+		return nil
+	}
+
+	stmt.Target = p.curToken.Literal
+	return stmt
+}
+
+// === HELPERS ===
+
+func smartJoin(parts []string) string {
+	out := ""
+	for i, part := range parts {
+		if i > 0 && isAlphaNum(parts[i-1]) && isAlphaNum(part) {
+			out += " "
+		}
+		out += part
+	}
+	return out
+}
+
+func isAlphaNum(s string) bool {
+	for _, ch := range s {
+		if ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ('0' <= ch && ch <= '9') {
+			return true
+		}
+	}
+	return false
 }

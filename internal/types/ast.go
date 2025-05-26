@@ -103,3 +103,20 @@ func (l *LinkStatement) TokenLiteral() string { return "link" }
 func (l *LinkStatement) String() string {
 	return "link " + l.From + " <-> " + l.To
 }
+
+type IfStatement struct {
+	Condition string // raw for now
+	Body      []Statement
+}
+
+func (i *IfStatement) statementNode()       {}
+func (i *IfStatement) TokenLiteral() string { return "if" }
+func (i *IfStatement) String() string       { return "if " + i.Condition + " { ... }" }
+
+type EnterStatement struct {
+	Target string
+}
+
+func (e *EnterStatement) statementNode()       {}
+func (e *EnterStatement) TokenLiteral() string { return "enter" }
+func (e *EnterStatement) String() string       { return "enter " + e.Target }
