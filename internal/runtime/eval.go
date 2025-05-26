@@ -41,6 +41,15 @@ func Eval(node types.Node, indent string) {
 			Eval(stmt, indent+"  ")
 		}
 
+	case *types.GoalStatement:
+		fmt.Printf("%sGoal: \"%s\"\n", indent, n.Value)
+
+	case *types.EmbedStatement:
+		fmt.Printf("%sEmbed: %s -> %s\n", indent, n.Source, n.Target)
+
+	case *types.LinkStatement:
+		fmt.Printf("%sLink: %s <-> %s\n", indent, n.From, n.To)
+
 	default:
 		fmt.Printf("%sUnknown node: %T\n", indent, n)
 	}

@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"strings"
+
 	"github.com/nbursa/sentience/internal/types"
 )
 
@@ -53,6 +55,12 @@ func (p *Parser) parseStatement() types.Statement {
 		return p.parseReflectStatement()
 	case TRAIN:
 		return p.parseTrainStatement()
+	case GOAL:
+		return p.parseGoalStatement()
+	case EMBED:
+		return p.parseEmbedStatement()
+	case LINK:
+		return p.parseLinkStatement()
 	default:
 		return nil
 	}
@@ -180,6 +188,86 @@ func (p *Parser) parseTrainStatement() types.Statement {
 		}
 		p.nextToken()
 	}
+
+	return stmt
+}
+
+func (p *Parser) parseGoalStatement() types.Statement {
+	stmt := &types.GoalStatement{}
+
+	p.nextToken() // expect :
+	if p.curToken.Type != COLON {
+		return nil
+	}
+
+	p.nextToken() // expect string
+	if p.curToken.Type != STRING {
+		return nil
+	}
+
+	stmt.Value = p.curToken.Literal
+	return stmt
+}
+
+func (p *Parser) parseEmbedStatement() types.Statement {
+	stmt := &types.EmbedStatement{}
+
+	p.nextToken() // expect source
+	if p.curToken.Type != IDENT {
+		return nil
+	}
+	stmt.Source = p.curToken.Literal
+
+	p.nextToken() // expect ->
+	if p.curToken.Type != ARROW {
+		return nil
+	}
+
+	// p.nextToken() // expect target
+	// if p.curToken.Type != IDENT {
+	// 	return nil
+	// }
+	// stmt.Target = p.curToken.Literal
+	p.nextToken() // expect target (could be mem.short)
+	targetParts := []string{}
+
+	if p.curToken.Type == MEM {
+		targetParts = append(targetParts, p.curToken.Literal)
+		p.nextToken()
+		if p.curToken.Type == DOT {
+			targetParts = append(targetParts, ".")
+			p.nextToken()
+		}
+	}
+
+	if p.curToken.Type == IDENT {
+		targetParts = append(targetParts, p.curToken.Literal)
+	}
+
+	stmt.Target = strings.Join(targetParts, "")
+
+	return stmt
+}
+
+func (p *Parser) parseLinkStatement() types.Statement {
+	stmt := &types.LinkStatement{}
+
+	p.nextToken() // from
+	if p.curToken.Type != IDENT {
+		return nil
+	}
+	stmt.From = p.curToken.Literal
+
+	p.nextToken() // <-> arrow
+	if p.curToken.Type != LINKARROW {
+		return nil
+	}
+
+	p.nextToken() // to
+	if p.curToken.Type != IDENT {
+		return nil
+	}
+	stmt.To = p.curToken.Literal
 
 	return stmt
 }

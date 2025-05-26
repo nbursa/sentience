@@ -53,12 +53,24 @@ func (l *Lexer) NextToken() Token {
 			ch := l.ch
 			l.readChar()
 			tok = Token{Type: ARROW, Literal: string(ch) + string(l.ch)}
+			l.readChar()
+			return tok
 		} else {
 			tok = newToken(ILLEGAL, l.ch)
+		}
+	case '<':
+		if l.peekChar() == '-' && l.readPosition+1 < len(l.input) && l.input[l.readPosition+1] == '>' {
+			l.readChar() // skip '-'
+			l.readChar() // skip '>'
+			tok = Token{Type: LINKARROW, Literal: "<->"}
+			l.readChar()
+			return tok
 		}
 	case '"':
 		tok.Type = STRING
 		tok.Literal = l.readString()
+	case ':':
+		tok = newToken(COLON, l.ch)
 	case 0:
 		tok.Type = EOF
 		tok.Literal = ""

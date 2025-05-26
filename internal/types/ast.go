@@ -32,8 +32,6 @@ type Expression interface {
 	expressionNode()
 }
 
-// === agent Foo { ... } ===
-
 type AgentStatement struct {
 	Name string
 	Body []Statement
@@ -43,8 +41,6 @@ func (as *AgentStatement) statementNode()       {}
 func (as *AgentStatement) TokenLiteral() string { return "agent" }
 func (as *AgentStatement) String() string       { return "agent " + as.Name }
 
-// === mem short ===
-
 type MemStatement struct {
 	Target string
 }
@@ -52,8 +48,6 @@ type MemStatement struct {
 func (ms *MemStatement) statementNode()       {}
 func (ms *MemStatement) TokenLiteral() string { return "mem" }
 func (ms *MemStatement) String() string       { return "mem " + ms.Target }
-
-// === on input(data) { ... } ===
 
 type OnInputStatement struct {
 	Param string
@@ -79,3 +73,33 @@ type TrainStatement struct {
 func (t *TrainStatement) statementNode()       {}
 func (t *TrainStatement) TokenLiteral() string { return "train" }
 func (t *TrainStatement) String() string       { return "train { ... }" }
+
+type GoalStatement struct {
+	Value string
+}
+
+func (g *GoalStatement) statementNode()       {}
+func (g *GoalStatement) TokenLiteral() string { return "goal" }
+func (g *GoalStatement) String() string       { return "goal: " + g.Value }
+
+type EmbedStatement struct {
+	Source string
+	Target string
+}
+
+func (e *EmbedStatement) statementNode()       {}
+func (e *EmbedStatement) TokenLiteral() string { return "embed" }
+func (e *EmbedStatement) String() string {
+	return "embed " + e.Source + " -> " + e.Target
+}
+
+type LinkStatement struct {
+	From string
+	To   string
+}
+
+func (l *LinkStatement) statementNode()       {}
+func (l *LinkStatement) TokenLiteral() string { return "link" }
+func (l *LinkStatement) String() string {
+	return "link " + l.From + " <-> " + l.To
+}

@@ -23,13 +23,15 @@ const (
 	INPUT   = "INPUT"
 
 	// Symbols
-	ASSIGN = "="
-	ARROW  = "->"
-	LPAREN = "("
-	RPAREN = ")"
-	LBRACE = "{"
-	RBRACE = "}"
-	DOT    = "."
+	ASSIGN    = "="
+	ARROW     = "->"
+	LPAREN    = "("
+	RPAREN    = ")"
+	LBRACE    = "{"
+	RBRACE    = "}"
+	DOT       = "."
+	COLON     = ":"
+	LINKARROW = "<->"
 )
 
 var keywords = map[string]TokenType{
