@@ -8,6 +8,7 @@ import (
 
 	"github.com/nbursa/sentience/internal/parser"
 	"github.com/nbursa/sentience/internal/runtime"
+	"github.com/nbursa/sentience/internal/types"
 )
 
 func main() {
@@ -51,6 +52,33 @@ func main() {
 			} else {
 				fmt.Println("Loaded from", path)
 				fmt.Println("MEM:", ctx.MemShort)
+			}
+			continue
+		}
+
+		if strings.HasPrefix(line, ".input ") {
+			input := strings.TrimSpace(strings.TrimPrefix(line, ".input "))
+			if ctx.CurrentAgent == nil {
+				fmt.Println("No agent registered.")
+				continue
+			}
+
+			// find on input
+			found := false
+			for _, stmt := range ctx.CurrentAgent.Body {
+				if inputStmt, ok := stmt.(*types.OnInputStatement); ok {
+					found = true
+					param := inputStmt.Param
+					ctx.SetMem("short", param, input)
+					for _, s := range inputStmt.Body {
+						runtime.Eval(s, "  ", ctx)
+					}
+					fmt.Println("MEM:", ctx.MemShort)
+				}
+			}
+
+			if !found {
+				fmt.Println("Agent has no on input handler.")
 			}
 			continue
 		}

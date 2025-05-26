@@ -3,11 +3,14 @@ package runtime
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/nbursa/sentience/internal/types"
 )
 
 type AgentContext struct {
-	MemShort map[string]string
-	MemLong  map[string]string
+	MemShort     map[string]string
+	MemLong      map[string]string
+	CurrentAgent *types.AgentStatement `json:"-"`
 }
 
 func NewAgentContext() *AgentContext {

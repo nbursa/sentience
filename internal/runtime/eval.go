@@ -19,6 +19,8 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 		for _, stmt := range n.Body {
 			Eval(stmt, indent+"  ", ctx)
 		}
+		ctx.CurrentAgent = n
+		fmt.Printf("%sAgent: %s [registered]\n", indent, n.Name)
 
 	case *types.MemStatement:
 		fmt.Printf("%sInit mem: %s\n", indent, n.Target)
