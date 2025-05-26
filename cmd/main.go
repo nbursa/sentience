@@ -5,21 +5,29 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/nbursa/sentience/internal/parser"
+	"github.com/nbursa/sentience/internal/runtime"
 )
 
 func main() {
 	fmt.Println("Sentience REPL v0.1")
 	scanner := bufio.NewScanner(os.Stdin)
+
 	for {
 		fmt.Print(">>> ")
 		if !scanner.Scan() {
 			break
 		}
+
 		line := strings.TrimSpace(scanner.Text())
 		if line == "exit" {
 			break
 		}
-		// TODO: Parse and evaluate line
-		fmt.Println("You said:", line)
+
+		lexer := parser.NewLexer(line)
+		p := parser.NewParser(lexer)
+		program := p.ParseProgram()
+		runtime.Eval(program, "")
 	}
 }
