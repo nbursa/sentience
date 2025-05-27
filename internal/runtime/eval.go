@@ -49,6 +49,9 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 
 	case *types.EmbedStatement:
 		fmt.Printf("%sEmbed: %s -> %s\n", indent, n.Source, n.Target)
+
+		val := ctx.GetMem("short", n.Source)
+
 		var target string
 		if n.Target == "mem.short" {
 			target = "short"
@@ -57,7 +60,7 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 		} else {
 			target = "short" // fallback
 		}
-		ctx.SetMem(target, n.Source, n.Source)
+		ctx.SetMem(target, n.Source, val)
 
 	case *types.LinkStatement:
 		fmt.Printf("%sLink: %s <-> %s\n", indent, n.From, n.To)
@@ -70,6 +73,10 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 
 	case *types.EnterStatement:
 		fmt.Printf("%sEnter: %s\n", indent, n.Target)
+
+	case *types.ReflectAccessStatement:
+		val := ctx.GetMem(n.MemTarget, n.Key)
+		fmt.Printf("%smem.%s[\"%s\"] = \"%s\"\n", indent, n.MemTarget, n.Key, val)
 
 	default:
 		fmt.Printf("%sUnknown node: %T\n", indent, n)

@@ -120,3 +120,14 @@ type EnterStatement struct {
 func (e *EnterStatement) statementNode()       {}
 func (e *EnterStatement) TokenLiteral() string { return "enter" }
 func (e *EnterStatement) String() string       { return "enter " + e.Target }
+
+type ReflectAccessStatement struct {
+	MemTarget string
+	Key       string
+}
+
+func (r *ReflectAccessStatement) statementNode()       {}
+func (r *ReflectAccessStatement) TokenLiteral() string { return "reflect-access" }
+func (r *ReflectAccessStatement) String() string {
+	return "mem." + r.MemTarget + "[\"" + r.Key + "\"]"
+}

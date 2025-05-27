@@ -32,6 +32,8 @@ const (
 	DOT       = "."
 	COLON     = ":"
 	LINKARROW = "<->"
+	LBRACKET  = "["
+	RBRACKET  = "]"
 )
 
 var keywords = map[string]TokenType{

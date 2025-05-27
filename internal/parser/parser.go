@@ -152,6 +152,45 @@ func (p *Parser) parseOnInputStatement() types.Statement {
 	return stmt
 }
 
+func (p *Parser) parseReflectAccess() types.Statement {
+	// Expect mem
+	if p.curToken.Type != MEM {
+		return nil
+	}
+	p.nextToken() // Expect DOT
+
+	if p.curToken.Type != DOT {
+		return nil
+	}
+	p.nextToken() // Expect IDENT (short)
+
+	if p.curToken.Type != IDENT {
+		return nil
+	}
+	target := p.curToken.Literal
+	p.nextToken() // Expect [
+
+	if p.curToken.Type != LBRACKET {
+		return nil
+	}
+	p.nextToken() // Expect STRING
+
+	if p.curToken.Type != STRING {
+		return nil
+	}
+	key := p.curToken.Literal
+	p.nextToken() // Expect ]
+
+	if p.curToken.Type != RBRACKET {
+		return nil
+	}
+
+	return &types.ReflectAccessStatement{
+		MemTarget: target,
+		Key:       key,
+	}
+}
+
 func (p *Parser) parseReflectStatement() types.Statement {
 	stmt := &types.ReflectStatement{}
 
@@ -164,7 +203,12 @@ func (p *Parser) parseReflectStatement() types.Statement {
 	p.nextToken()
 
 	for p.curToken.Type != RBRACE && p.curToken.Type != EOF {
-		bodyStmt := p.parseStatement()
+		var bodyStmt types.Statement
+		if p.curToken.Type == MEM {
+			bodyStmt = p.parseReflectAccess()
+		} else {
+			bodyStmt = p.parseStatement()
+		}
 		if bodyStmt != nil {
 			stmt.Body = append(stmt.Body, bodyStmt)
 		}
@@ -227,11 +271,6 @@ func (p *Parser) parseEmbedStatement() types.Statement {
 		return nil
 	}
 
-	// p.nextToken() // expect target
-	// if p.curToken.Type != IDENT {
-	// 	return nil
-	// }
-	// stmt.Target = p.curToken.Literal
 	p.nextToken() // expect target (could be mem.short)
 	targetParts := []string{}
 
