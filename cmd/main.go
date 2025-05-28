@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Sentience REPL v0.1 (multiline enabled)")
+	fmt.Println("Sentience REPL v0.1")
 	scanner := bufio.NewScanner(os.Stdin)
 	ctx := runtime.NewAgentContext()
 
