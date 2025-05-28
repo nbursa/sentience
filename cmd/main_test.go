@@ -21,9 +21,7 @@ func TestSentienceMainAgentFlow(t *testing.T) {
 				}
 			}
 		}
-
-	.train hello
-	`)
+		.train hello`)
 
 	var stdout bytes.Buffer
 	cmd.Stdin = stdin
