@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 type Node interface {
 	TokenLiteral() string
 	String() string
@@ -129,5 +131,5 @@ type ReflectAccessStatement struct {
 func (r *ReflectAccessStatement) statementNode()       {}
 func (r *ReflectAccessStatement) TokenLiteral() string { return "reflect-access" }
 func (r *ReflectAccessStatement) String() string {
-	return "mem." + r.MemTarget + "[\"" + r.Key + "\"]"
+	return fmt.Sprintf(`mem.%s["%s"]`, r.MemTarget, r.Key)
 }

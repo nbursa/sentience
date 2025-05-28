@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	fmt.Println("Sentience REPL v0.1")
-	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("Sentience REPL v0.1 (reader mode)")
+	reader := bufio.NewReader(os.Stdin)
 	ctx := runtime.NewAgentContext()
 
 	var buffer []string
@@ -26,16 +26,15 @@ func main() {
 		}
 
 		fmt.Print(prompt)
-		if !scanner.Scan() {
+		line, err := reader.ReadString('\n')
+		if err != nil {
 			break
 		}
-
-		line := strings.TrimSpace(scanner.Text())
+		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
 
-		// basic commands
 		if blockDepth == 0 && strings.HasPrefix(line, ".input ") {
 			input := strings.TrimSpace(strings.TrimPrefix(line, ".input "))
 			if ctx.CurrentAgent == nil {
@@ -55,6 +54,28 @@ func main() {
 			}
 			if !found {
 				fmt.Println("Agent has no on input handler.")
+			}
+			continue
+		}
+
+		if blockDepth == 0 && strings.HasPrefix(line, ".train ") {
+			input := strings.TrimSpace(strings.TrimPrefix(line, ".train "))
+			if ctx.CurrentAgent == nil {
+				fmt.Println("No agent registered.")
+				continue
+			}
+			found := false
+			for _, stmt := range ctx.CurrentAgent.Body {
+				if trainStmt, ok := stmt.(*types.TrainStatement); ok {
+					found = true
+					ctx.SetMem("short", "msg", input)
+					for _, s := range trainStmt.Body {
+						runtime.Eval(s, "  ", ctx)
+					}
+				}
+			}
+			if !found {
+				fmt.Println("Agent has no train block.")
 			}
 			continue
 		}
@@ -87,7 +108,6 @@ func main() {
 			continue
 		}
 
-		// track block depth for multiline support
 		blockDepth += strings.Count(line, "{")
 		blockDepth -= strings.Count(line, "}")
 

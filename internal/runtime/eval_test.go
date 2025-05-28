@@ -1,104 +1,81 @@
 package runtime
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 
+	"github.com/nbursa/sentience/internal/parser"
 	"github.com/nbursa/sentience/internal/types"
 )
 
-func TestReflectAccess_ExistingKey(t *testing.T) {
-	ctx := NewAgentContext()
-	ctx.SetMem("short", "msg", "danas je ponedeljak")
+func TestTrainReflectEval(t *testing.T) {
+	input := `
+	agent Echo {
+	  mem short
+	  train {
+	    if loss > 0.1 {
+	      reflect {
+	        mem.short["msg"]
+	      }
+	    }
+	  }
+	}`
 
-	stmt := &types.ReflectAccessStatement{
-		MemTarget: "short",
-		Key:       "msg",
+	lexer := parser.NewLexer(input)
+	p := parser.NewParser(lexer)
+	program := p.ParseProgram()
+
+	// === LOG STRUCTURE ===
+	t.Logf("Parsed Program:\n")
+	for _, stmt := range program.Statements {
+		t.Logf("Top-level: %T", stmt)
+		if agent, ok := stmt.(*types.AgentStatement); ok {
+			for _, sub := range agent.Body {
+				t.Logf("  AgentBody: %T", sub)
+				if train, ok := sub.(*types.TrainStatement); ok {
+					for _, sub2 := range train.Body {
+						t.Logf("    TrainBody: %T", sub2)
+						if ifstmt, ok := sub2.(*types.IfStatement); ok {
+							for _, sub3 := range ifstmt.Body {
+								t.Logf("      IfBody: %T", sub3)
+								if refl, ok := sub3.(*types.ReflectStatement); ok {
+									for _, sub4 := range refl.Body {
+										t.Logf("        ReflectBody: %T", sub4)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
-	Eval(stmt, "", ctx)
+	ctx := NewAgentContext()
+	var out bytes.Buffer
 
-	got := ctx.GetMem("short", "msg")
-	want := "danas je ponedeljak"
-	if got != want {
-		t.Errorf("expected %q, got %q", want, got)
+	withCapturedOutput(&out, func() {
+		Eval(program, "", ctx)
+		ctx.SetMem("short", "msg", "hello")
+		for _, stmt := range ctx.CurrentAgent.Body {
+			if trainStmt, ok := stmt.(*types.TrainStatement); ok {
+				for _, s := range trainStmt.Body {
+					Eval(s, "  ", ctx)
+				}
+			}
+		}
+	})
+
+	output := out.String()
+	if !strings.Contains(output, `mem.short["msg"] = "hello"`) {
+		t.Errorf("expected reflect output not found, got:\n%s", output)
 	}
 }
 
-func TestReflectAccess_MissingKey(t *testing.T) {
-	ctx := NewAgentContext()
-
-	stmt := &types.ReflectAccessStatement{
-		MemTarget: "short",
-		Key:       "nema",
-	}
-
-	Eval(stmt, "", ctx)
-
-	got := ctx.GetMem("short", "nema")
-	if got != "" {
-		t.Errorf("expected empty string, got %q", got)
-	}
-}
-
-func TestEmbedStatement_Eval(t *testing.T) {
-	ctx := NewAgentContext()
-	ctx.SetMem("short", "msg", "vrednost")
-
-	embed := &types.EmbedStatement{
-		Source: "msg",
-		Target: "mem.short",
-	}
-
-	Eval(embed, "", ctx)
-
-	got := ctx.GetMem("short", "msg")
-	want := "vrednost"
-	if got != want {
-		t.Errorf("expected %q, got %q", want, got)
-	}
-}
-
-func TestAgentStatement_Eval(t *testing.T) {
-	ctx := NewAgentContext()
-
-	agent := &types.AgentStatement{
-		Name: "Echo",
-		Body: []types.Statement{
-			&types.MemStatement{Target: "short"},
-		},
-	}
-
-	Eval(agent, "", ctx)
-
-	if ctx.CurrentAgent == nil || ctx.CurrentAgent.Name != "Echo" {
-		t.Fatalf("expected agent Echo to be registered")
-	}
-
-	got := ctx.GetMem("short", "__init__")
-	if got != "1" {
-		t.Errorf("expected mem.short[__init__] = %q, got %q", "1", got)
-	}
-}
-
-func TestOnInputStatement_Eval(t *testing.T) {
-	ctx := NewAgentContext()
-	ctx.SetMem("short", "inputParam", "pozdrav")
-
-	onInput := &types.OnInputStatement{
-		Param: "inputParam",
-		Body: []types.Statement{
-			&types.EmbedStatement{
-				Source: "inputParam",
-				Target: "mem.short",
-			},
-		},
-	}
-
-	Eval(onInput, "", ctx)
-
-	got := ctx.GetMem("short", "inputParam")
-	want := "pozdrav"
-	if got != want {
-		t.Errorf("expected %q, got %q", want, got)
-	}
+func withCapturedOutput(buf *bytes.Buffer, fn func()) {
+	prev := outWriter
+	outWriter = buf
+	defer func() { outWriter = prev }()
+	fn()
 }

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/nbursa/sentience/internal/types"
@@ -153,37 +154,51 @@ func (p *Parser) parseOnInputStatement() types.Statement {
 }
 
 func (p *Parser) parseReflectAccess() types.Statement {
-	// Expect mem
+	fmt.Println("[access] start token:", p.curToken.Type, p.curToken.Literal)
+
 	if p.curToken.Type != MEM {
+		fmt.Println("[access] expected MEM, got:", p.curToken.Type)
 		return nil
 	}
-	p.nextToken() // Expect DOT
 
+	p.nextToken() // expect DOT
+	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != DOT {
+		fmt.Println("[access] expected DOT, got:", p.curToken.Type)
 		return nil
 	}
-	p.nextToken() // Expect IDENT (short)
 
+	p.nextToken() // expect IDENT (short/long)
+	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != IDENT {
+		fmt.Println("[access] expected IDENT, got:", p.curToken.Type)
 		return nil
 	}
 	target := p.curToken.Literal
-	p.nextToken() // Expect [
 
+	p.nextToken() // expect [
+	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != LBRACKET {
+		fmt.Println("[access] expected LBRACKET, got:", p.curToken.Type)
 		return nil
 	}
-	p.nextToken() // Expect STRING
 
+	p.nextToken() // expect STRING
+	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != STRING {
+		fmt.Println("[access] expected STRING, got:", p.curToken.Type)
 		return nil
 	}
 	key := p.curToken.Literal
-	p.nextToken() // Expect ]
 
+	p.nextToken() // expect ]
+	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != RBRACKET {
+		fmt.Println("[access] expected RBRACKET, got:", p.curToken.Type)
 		return nil
 	}
+
+	fmt.Println("[access] parsed ReflectAccessStatement:", target, key)
 
 	return &types.ReflectAccessStatement{
 		MemTarget: target,
@@ -203,16 +218,23 @@ func (p *Parser) parseReflectStatement() types.Statement {
 	p.nextToken()
 
 	for p.curToken.Type != RBRACE && p.curToken.Type != EOF {
-		var bodyStmt types.Statement
+		fmt.Println("[debug] token in reflect:", p.curToken.Type, p.curToken.Literal)
 		if p.curToken.Type == MEM {
-			bodyStmt = p.parseReflectAccess()
+			access := p.parseReflectAccess()
+			if access != nil {
+				stmt.Body = append(stmt.Body, access)
+				p.nextToken() // advance after ]
+				continue
+			}
+		}
+
+		// fallback
+		body := p.parseStatement()
+		if body != nil {
+			stmt.Body = append(stmt.Body, body)
 		} else {
-			bodyStmt = p.parseStatement()
+			p.nextToken()
 		}
-		if bodyStmt != nil {
-			stmt.Body = append(stmt.Body, bodyStmt)
-		}
-		p.nextToken()
 	}
 
 	return stmt

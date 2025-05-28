@@ -69,6 +69,8 @@ func (l *Lexer) NextToken() Token {
 	case '"':
 		tok.Type = STRING
 		tok.Literal = l.readString()
+		l.readChar()
+		return tok
 	case ':':
 		tok = newToken(COLON, l.ch)
 	case '[':
@@ -124,14 +126,14 @@ func (l *Lexer) readNumber() string {
 }
 
 func (l *Lexer) readString() string {
-	l.readChar() // skip initial "
-	start := l.position
-	for l.ch != '"' && l.ch != 0 {
+	start := l.position + 1 // skip initial "
+	for {
 		l.readChar()
+		if l.ch == '"' || l.ch == 0 {
+			break
+		}
 	}
-	out := l.input[start:l.position]
-	l.readChar() // skip closing "
-	return out
+	return l.input[start:l.position]
 }
 
 func isLetter(ch byte) bool {
