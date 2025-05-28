@@ -133,3 +133,11 @@ func (r *ReflectAccessStatement) TokenLiteral() string { return "reflect-access"
 func (r *ReflectAccessStatement) String() string {
 	return fmt.Sprintf(`mem.%s["%s"]`, r.MemTarget, r.Key)
 }
+
+type PrintStatement struct {
+	Value string
+}
+
+func (p *PrintStatement) statementNode()       {}
+func (p *PrintStatement) TokenLiteral() string { return "print" }
+func (p *PrintStatement) String() string       { return "print \"" + p.Value + "\"" }

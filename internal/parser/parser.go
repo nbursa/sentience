@@ -66,6 +66,8 @@ func (p *Parser) parseStatement() types.Statement {
 		return p.parseIfStatement()
 	case ENTER:
 		return p.parseEnterStatement()
+	case PRINT:
+		return p.parsePrintStatement()
 	default:
 		return nil
 	}
@@ -406,4 +408,16 @@ func isAlphaNum(s string) bool {
 		}
 	}
 	return false
+}
+
+func (p *Parser) parsePrintStatement() types.Statement {
+	stmt := &types.PrintStatement{}
+
+	p.nextToken() // expect STRING
+	if p.curToken.Type != STRING {
+		return nil
+	}
+
+	stmt.Value = p.curToken.Literal
+	return stmt
 }

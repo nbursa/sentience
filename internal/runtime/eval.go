@@ -95,6 +95,9 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 		val := ctx.GetMem(n.MemTarget, n.Key)
 		printOut("%smem.%s[\"%s\"] = \"%s\"\n", indent, n.MemTarget, n.Key, val)
 
+	case *types.PrintStatement:
+		fmt.Printf("%s%s\n", indent, n.Value)
+
 	default:
 		printOut("%sUnknown node: %T\n", indent, n)
 	}
