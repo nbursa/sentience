@@ -12,22 +12,54 @@ import (
 )
 
 func main() {
-	fmt.Println("Sentience REPL v0.1")
+	fmt.Println("Sentience REPL v0.1 (multiline enabled)")
 	scanner := bufio.NewScanner(os.Stdin)
 	ctx := runtime.NewAgentContext()
 
+	var buffer []string
+	blockDepth := 0
+
 	for {
-		fmt.Print(">>> ")
+		prompt := ">>> "
+		if blockDepth > 0 {
+			prompt = "... "
+		}
+
+		fmt.Print(prompt)
 		if !scanner.Scan() {
 			break
 		}
 
 		line := strings.TrimSpace(scanner.Text())
-		if line == "exit" {
-			break
+		if line == "" {
+			continue
 		}
 
-		if strings.HasPrefix(line, ".save") {
+		// basic commands
+		if blockDepth == 0 && strings.HasPrefix(line, ".input ") {
+			input := strings.TrimSpace(strings.TrimPrefix(line, ".input "))
+			if ctx.CurrentAgent == nil {
+				fmt.Println("No agent registered.")
+				continue
+			}
+			found := false
+			for _, stmt := range ctx.CurrentAgent.Body {
+				if inputStmt, ok := stmt.(*types.OnInputStatement); ok {
+					found = true
+					param := inputStmt.Param
+					ctx.SetMem("short", param, input)
+					for _, s := range inputStmt.Body {
+						runtime.Eval(s, "  ", ctx)
+					}
+				}
+			}
+			if !found {
+				fmt.Println("Agent has no on input handler.")
+			}
+			continue
+		}
+
+		if blockDepth == 0 && strings.HasPrefix(line, ".save") {
 			path := "ctx.json"
 			parts := strings.Fields(line)
 			if len(parts) > 1 {
@@ -41,7 +73,7 @@ func main() {
 			continue
 		}
 
-		if strings.HasPrefix(line, ".load") {
+		if blockDepth == 0 && strings.HasPrefix(line, ".load") {
 			path := "ctx.json"
 			parts := strings.Fields(line)
 			if len(parts) > 1 {
@@ -51,42 +83,23 @@ func main() {
 				fmt.Println("Error loading:", err)
 			} else {
 				fmt.Println("Loaded from", path)
-				fmt.Println("MEM:", ctx.MemShort)
 			}
 			continue
 		}
 
-		if strings.HasPrefix(line, ".input ") {
-			input := strings.TrimSpace(strings.TrimPrefix(line, ".input "))
-			if ctx.CurrentAgent == nil {
-				fmt.Println("No agent registered.")
-				continue
-			}
+		// track block depth for multiline support
+		blockDepth += strings.Count(line, "{")
+		blockDepth -= strings.Count(line, "}")
 
-			// find on input
-			found := false
-			for _, stmt := range ctx.CurrentAgent.Body {
-				if inputStmt, ok := stmt.(*types.OnInputStatement); ok {
-					found = true
-					param := inputStmt.Param
-					ctx.SetMem("short", param, input)
-					for _, s := range inputStmt.Body {
-						runtime.Eval(s, "  ", ctx)
-					}
-					fmt.Println("MEM:", ctx.MemShort)
-				}
-			}
+		buffer = append(buffer, line)
 
-			if !found {
-				fmt.Println("Agent has no on input handler.")
-			}
-			continue
+		if blockDepth == 0 {
+			fullInput := strings.Join(buffer, " ")
+			lexer := parser.NewLexer(fullInput)
+			p := parser.NewParser(lexer)
+			program := p.ParseProgram()
+			runtime.Eval(program, "", ctx)
+			buffer = nil
 		}
-
-		lexer := parser.NewLexer(line)
-		p := parser.NewParser(lexer)
-		program := p.ParseProgram()
-		runtime.Eval(program, "", ctx)
-		fmt.Println("MEM:", ctx.MemShort)
 	}
 }
