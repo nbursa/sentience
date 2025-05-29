@@ -22,6 +22,7 @@ const (
 	LINK    = "LINK"
 	INPUT   = "INPUT"
 	PRINT   = "PRINT"
+	EVOLVE  = "EVOLVE"
 
 	// Symbols
 	ASSIGN    = "="
@@ -50,6 +51,7 @@ var keywords = map[string]TokenType{
 	"link":    LINK,
 	"input":   INPUT,
 	"print":   PRINT,
+	"evolve":  EVOLVE,
 }
 
 func LookupIdent(ident string) TokenType {

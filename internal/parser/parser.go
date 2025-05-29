@@ -68,6 +68,8 @@ func (p *Parser) parseStatement() types.Statement {
 		return p.parseEnterStatement()
 	case PRINT:
 		return p.parsePrintStatement()
+	case EVOLVE:
+		return p.parseEvolveStatement()
 	default:
 		return nil
 	}
@@ -221,6 +223,29 @@ func (p *Parser) parseReflectStatement() types.Statement {
 
 	for p.curToken.Type != RBRACE && p.curToken.Type != EOF {
 		// fmt.Println("[debug] token in reflect:", p.curToken.Type, p.curToken.Literal)
+		if p.curToken.Type == MEM && p.peekToken.Type == DOT {
+			p.nextToken() // consume MEM
+			p.nextToken() // consume DOT
+			if p.curToken.Type == IDENT && p.curToken.Literal == "latent" {
+				p.nextToken()
+				if p.curToken.Type == IDENT && p.curToken.Literal == "similar_to" {
+					p.nextToken()
+					if p.curToken.Type == LPAREN {
+						p.nextToken()
+						if p.curToken.Type == STRING {
+							query := p.curToken.Literal
+							p.nextToken()
+							if p.curToken.Type == RPAREN {
+								stmt.Body = append(stmt.Body, &types.ReflectLatentStatement{Query: query})
+								p.nextToken()
+								continue
+							}
+						}
+					}
+				}
+			}
+		}
+
 		if p.curToken.Type == MEM {
 			access := p.parseReflectAccess()
 			if access != nil {
@@ -419,5 +444,27 @@ func (p *Parser) parsePrintStatement() types.Statement {
 	}
 
 	stmt.Value = p.curToken.Literal
+	return stmt
+}
+
+func (p *Parser) parseEvolveStatement() types.Statement {
+	stmt := &types.EvolveStatement{}
+
+	p.nextToken() // expect {
+	if p.curToken.Type != LBRACE {
+		return nil
+	}
+
+	stmt.Body = []types.Statement{}
+	p.nextToken()
+
+	for p.curToken.Type != RBRACE && p.curToken.Type != EOF {
+		bodyStmt := p.parseStatement()
+		if bodyStmt != nil {
+			stmt.Body = append(stmt.Body, bodyStmt)
+		}
+		p.nextToken()
+	}
+
 	return stmt
 }

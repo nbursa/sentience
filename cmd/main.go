@@ -110,6 +110,28 @@ func main() {
 			continue
 		}
 
+		if blockDepth == 0 && strings.HasPrefix(line, ".evolve ") {
+			input := strings.TrimSpace(strings.TrimPrefix(line, ".evolve "))
+			if ctx.CurrentAgent == nil {
+				fmt.Println("No agent registered.")
+				continue
+			}
+			found := false
+			for _, stmt := range ctx.CurrentAgent.Body {
+				if evolveStmt, ok := stmt.(*types.EvolveStatement); ok {
+					found = true
+					ctx.SetMem("short", "msg", input)
+					for _, s := range evolveStmt.Body {
+						runtime.Eval(s, "  ", ctx)
+					}
+				}
+			}
+			if !found {
+				fmt.Println("Agent has no evolve block.")
+			}
+			continue
+		}
+
 		blockDepth += strings.Count(line, "{")
 		blockDepth -= strings.Count(line, "}")
 

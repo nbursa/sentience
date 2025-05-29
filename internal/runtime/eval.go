@@ -126,6 +126,16 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 	case *types.PrintStatement:
 		printOut("%s%s\n", indent, n.Value)
 
+	case *types.EvolveStatement:
+		printOut("%sEvolve block:\n", indent)
+		for _, stmt := range n.Body {
+			Eval(stmt, indent+"  ", ctx)
+		}
+
+	case *types.ReflectLatentStatement:
+		results := ctx.SimilarTo(n.Query)
+		printOut("%smem.latent similar_to(\"%s\") → %v\n", indent, n.Query, results)
+
 	default:
 		printOut("%sUnknown node: %T\n", indent, n)
 	}

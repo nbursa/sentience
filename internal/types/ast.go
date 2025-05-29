@@ -76,6 +76,14 @@ func (t *TrainStatement) statementNode()       {}
 func (t *TrainStatement) TokenLiteral() string { return "train" }
 func (t *TrainStatement) String() string       { return "train { ... }" }
 
+type EvolveStatement struct {
+	Body []Statement
+}
+
+func (e *EvolveStatement) statementNode()       {}
+func (e *EvolveStatement) TokenLiteral() string { return "evolve" }
+func (e *EvolveStatement) String() string       { return "evolve { ... }" }
+
 type GoalStatement struct {
 	Value string
 }
@@ -141,3 +149,13 @@ type PrintStatement struct {
 func (p *PrintStatement) statementNode()       {}
 func (p *PrintStatement) TokenLiteral() string { return "print" }
 func (p *PrintStatement) String() string       { return "print \"" + p.Value + "\"" }
+
+type ReflectLatentStatement struct {
+	Query string
+}
+
+func (r *ReflectLatentStatement) statementNode()       {}
+func (r *ReflectLatentStatement) TokenLiteral() string { return "reflect-latent" }
+func (r *ReflectLatentStatement) String() string {
+	return fmt.Sprintf(`mem.latent similar_to("%s")`, r.Query)
+}
