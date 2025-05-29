@@ -76,12 +76,31 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 
 	case *types.LinkStatement:
 		printOut("%sLink: %s <-> %s\n", indent, n.From, n.To)
+		ctx.Links[n.From] = n.To
+		ctx.Links[n.To] = n.From
 
 	case *types.IfStatement:
 		printOut("%sIf: %s\n", indent, n.Condition)
-		if strings.Contains(n.Condition, "loss") {
-			for _, stmt := range n.Body {
-				Eval(stmt, indent+"  ", ctx)
+
+		// contextual check
+		if strings.HasPrefix(n.Condition, "context includes ") {
+			key := strings.TrimPrefix(n.Condition, "context includes ")
+			key = strings.Trim(key, `"' `)
+
+			found := false
+			for k := range ctx.MemShort {
+				if strings.Contains(k, key) || strings.Contains(ctx.MemShort[k], key) {
+					found = true
+					break
+				}
+			}
+
+			if found {
+				for _, stmt := range n.Body {
+					Eval(stmt, indent+"  ", ctx)
+				}
+			} else {
+				printOut("%s  [context miss: \"%s\"]\n", indent, key)
 			}
 		} else {
 			printOut("%sCondition not supported: %s\n", indent, n.Condition)
@@ -91,7 +110,7 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 		printOut("%sEnter: %s\n", indent, n.Target)
 
 	case *types.ReflectAccessStatement:
-		fmt.Println("[debug] executing ReflectAccessStatement")
+		// fmt.Println("[debug] executing ReflectAccessStatement")
 		val := ctx.GetMem(n.MemTarget, n.Key)
 		printOut("%smem.%s[\"%s\"] = \"%s\"\n", indent, n.MemTarget, n.Key, val)
 

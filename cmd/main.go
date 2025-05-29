@@ -25,7 +25,9 @@ func main() {
 			prompt = "... "
 		}
 
-		fmt.Print(prompt)
+		if blockDepth == 0 {
+			fmt.Print(prompt)
+		}
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			break

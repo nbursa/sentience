@@ -11,12 +11,14 @@ type AgentContext struct {
 	MemShort     map[string]string
 	MemLong      map[string]string
 	CurrentAgent *types.AgentStatement `json:"-"`
+	Links        map[string]string
 }
 
 func NewAgentContext() *AgentContext {
 	return &AgentContext{
 		MemShort: make(map[string]string),
 		MemLong:  make(map[string]string),
+		Links:    make(map[string]string),
 	}
 }
 

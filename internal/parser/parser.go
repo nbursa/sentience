@@ -156,22 +156,22 @@ func (p *Parser) parseOnInputStatement() types.Statement {
 }
 
 func (p *Parser) parseReflectAccess() types.Statement {
-	fmt.Println("[access] start token:", p.curToken.Type, p.curToken.Literal)
+	// fmt.Println("[access] start token:", p.curToken.Type, p.curToken.Literal)
 
 	if p.curToken.Type != MEM {
-		fmt.Println("[access] expected MEM, got:", p.curToken.Type)
+		// fmt.Println("[access] expected MEM, got:", p.curToken.Type)
 		return nil
 	}
 
 	p.nextToken() // expect DOT
-	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
+	// fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != DOT {
 		fmt.Println("[access] expected DOT, got:", p.curToken.Type)
 		return nil
 	}
 
 	p.nextToken() // expect IDENT (short/long)
-	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
+	// fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != IDENT {
 		fmt.Println("[access] expected IDENT, got:", p.curToken.Type)
 		return nil
@@ -179,14 +179,14 @@ func (p *Parser) parseReflectAccess() types.Statement {
 	target := p.curToken.Literal
 
 	p.nextToken() // expect [
-	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
+	// fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != LBRACKET {
 		fmt.Println("[access] expected LBRACKET, got:", p.curToken.Type)
 		return nil
 	}
 
 	p.nextToken() // expect STRING
-	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
+	// fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != STRING {
 		fmt.Println("[access] expected STRING, got:", p.curToken.Type)
 		return nil
@@ -194,13 +194,13 @@ func (p *Parser) parseReflectAccess() types.Statement {
 	key := p.curToken.Literal
 
 	p.nextToken() // expect ]
-	fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
+	// fmt.Println("[access] next token:", p.curToken.Type, p.curToken.Literal)
 	if p.curToken.Type != RBRACKET {
 		fmt.Println("[access] expected RBRACKET, got:", p.curToken.Type)
 		return nil
 	}
 
-	fmt.Println("[access] parsed ReflectAccessStatement:", target, key)
+	// fmt.Println("[access] parsed ReflectAccessStatement:", target, key)
 
 	return &types.ReflectAccessStatement{
 		MemTarget: target,
@@ -220,7 +220,7 @@ func (p *Parser) parseReflectStatement() types.Statement {
 	p.nextToken()
 
 	for p.curToken.Type != RBRACE && p.curToken.Type != EOF {
-		fmt.Println("[debug] token in reflect:", p.curToken.Type, p.curToken.Literal)
+		// fmt.Println("[debug] token in reflect:", p.curToken.Type, p.curToken.Literal)
 		if p.curToken.Type == MEM {
 			access := p.parseReflectAccess()
 			if access != nil {
