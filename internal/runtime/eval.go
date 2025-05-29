@@ -28,10 +28,12 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 
 	case *types.AgentStatement:
 		printOut("%sAgent: %s\n", indent, n.Name)
-		for _, stmt := range n.Body {
-			Eval(stmt, indent+"  ", ctx)
-		}
 		ctx.CurrentAgent = n
+		for _, stmt := range n.Body {
+			if _, isTrain := stmt.(*types.TrainStatement); !isTrain {
+				Eval(stmt, indent+"  ", ctx)
+			}
+		}
 		printOut("%sAgent: %s [registered]\n", indent, n.Name)
 
 	case *types.MemStatement:
@@ -82,7 +84,14 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 	case *types.IfStatement:
 		printOut("%sIf: %s\n", indent, n.Condition)
 
-		// contextual check
+		if strings.Contains(n.Condition, "loss") {
+			printOut("%s  [stub eval: assuming loss > 0.1]\n", indent)
+			for _, stmt := range n.Body {
+				Eval(stmt, indent+"  ", ctx)
+			}
+			return
+		}
+
 		if strings.HasPrefix(n.Condition, "context includes ") {
 			key := strings.TrimPrefix(n.Condition, "context includes ")
 			key = strings.Trim(key, `"' `)
@@ -115,7 +124,7 @@ func Eval(node types.Node, indent string, ctx *AgentContext) {
 		printOut("%smem.%s[\"%s\"] = \"%s\"\n", indent, n.MemTarget, n.Key, val)
 
 	case *types.PrintStatement:
-		fmt.Printf("%s%s\n", indent, n.Value)
+		printOut("%s%s\n", indent, n.Value)
 
 	default:
 		printOut("%sUnknown node: %T\n", indent, n)
