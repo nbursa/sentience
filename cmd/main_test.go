@@ -21,7 +21,8 @@ func TestSentienceMainAgentFlow(t *testing.T) {
 				}
 			}
 		}
-		.train hello`)
+		.train hello
+		`)
 
 	var stdout bytes.Buffer
 	cmd.Stdin = stdin
@@ -34,6 +35,8 @@ func TestSentienceMainAgentFlow(t *testing.T) {
 	}
 
 	output := stdout.String()
+	t.Logf("Output:\n%s", output)
+
 	if !strings.Contains(output, `mem.short["msg"] = "hello"`) {
 		t.Errorf("expected reflect output not found, got:\n%s", output)
 	}
