@@ -12,7 +12,46 @@ import (
 )
 
 func main() {
-	fmt.Println("Sentience REPL v0.1 (reader mode)")
+	fmt.Printf("%s %s (%s)\n", types.VersionName, types.Version, types.ReleaseDate)
+	fmt.Println("REPL mode: reader")
+
+	if len(os.Args) > 1 && os.Args[1] == "run" {
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: run <file>")
+			os.Exit(1)
+		}
+		content, err := os.ReadFile(os.Args[2])
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+		lexer := parser.NewLexer(string(content))
+		p := parser.NewParser(lexer)
+		program := p.ParseProgram()
+		ctx := runtime.NewAgentContext()
+		runtime.Eval(program, "", ctx)
+
+		if len(os.Args) > 3 && os.Args[3] == "--input" {
+			if len(os.Args) < 5 {
+				fmt.Println("Usage: run <file> --input <text>")
+				os.Exit(1)
+			}
+			input := os.Args[4]
+			if program != nil && len(program.Statements) > 0 {
+				ctx.SetMem("short", "msg", input)
+				for _, stmt := range ctx.CurrentAgent.Body {
+					if inputStmt, ok := stmt.(*types.OnInputStatement); ok {
+						for _, s := range inputStmt.Body {
+							runtime.Eval(s, "  ", ctx)
+						}
+					}
+				}
+			}
+		}
+
+		return
+	}
+
 	reader := bufio.NewReader(os.Stdin)
 	ctx := runtime.NewAgentContext()
 
