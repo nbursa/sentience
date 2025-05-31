@@ -146,3 +146,5 @@ Contributors: [Nenad Bursać](https://nenadbursac.com)
 ## Contact
 
 If you have questions, suggestions, or want to contribute, please open an [issue](https://github.com/nbursa/sentience/issues) or submit a pull request.
+
+<!-- GitAds-Verify: 483D8373RQT8LRDOVYW2V4FASLJRMSNM -->
