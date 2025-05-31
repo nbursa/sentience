@@ -111,7 +111,6 @@ impl<'a> Parser<'a> {
 
     /// Parse either a full `reflect { ... }` block or a single-line `reflect mem.<target>["<key>"]`.
     fn parse_reflect(&mut self) -> Option<Statement> {
-        // Ako nakon `reflect` sledi `{`, parsiraj blok ručno
         if self.peek_token.token_type == TokenType::LBrace {
             self.next_token(); // cur_token == LBrace
             self.next_token(); // cur_token == Mem
@@ -131,7 +130,6 @@ impl<'a> Parser<'a> {
             });
         }
 
-        // Jedno-linijski `reflect mem.<target>["<key>"]`
         self.next_token();
         if self.cur_token.token_type != TokenType::Mem {
             return None;
@@ -143,7 +141,6 @@ impl<'a> Parser<'a> {
     }
 
     fn expect_dot_and_bracket(&mut self) -> Option<(String, String)> {
-        // Peformira: Mem . IDENT [ "STRING" ]
         self.next_token();
         if self.cur_token.token_type != TokenType::Dot {
             return None;
