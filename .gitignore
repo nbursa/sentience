@@ -16,3 +16,9 @@ ctx.json
 .idea/
 .DS_Store
 *.swp
+
+# Ignore Rust/Cargo build artifacts:
+/target/
+**/*.rs.bk
+**/*~
+**/*.swp
