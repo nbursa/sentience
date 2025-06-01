@@ -1,4 +1,4 @@
-# Sentience (v0.1.0)
+# Sentience (v0.2.0)
 
 Sentience is an experimental, AI-native programming language built around:
 - **Memory-first architecture** (`mem.short`, `mem.long`, and potentially `mem.latent`)
