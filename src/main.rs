@@ -17,7 +17,7 @@ fn print_prompt() {
 }
 
 fn main() {
-    println!("Sentience REPL v0.1 (Rust)");
+    println!("Sentience REPL v0.1.1 (Rust)");
 
     let stdin = io::stdin();
     let mut lines = stdin.lock().lines();
@@ -27,20 +27,25 @@ fn main() {
     let mut depth = 0;
 
     print_prompt();
+
     while let Some(Ok(line)) = lines.next() {
         let trimmed = line.trim();
+
         if trimmed.is_empty() && depth == 0 {
             print_prompt();
             continue;
         }
+
         if depth == 0 && trimmed.starts_with('.') {
             handle_command(trimmed, &mut ctx);
             print_prompt();
             continue;
         }
+
         depth += trimmed.matches('{').count();
         depth -= trimmed.matches('}').count();
         buffer.push(trimmed.to_string());
+
         if depth == 0 {
             let full_input = buffer.join(" ");
             let mut lexer = Lexer::new(&full_input);
@@ -64,6 +69,7 @@ fn handle_command(line: &str, ctx: &mut AgentContext) {
         println!("No agent registered.");
         return;
     }
+
     if let Some(Statement::AgentDeclaration { body, .. }) = ctx.current_agent.clone() {
         for stmt in body {
             match (cmd, &stmt) {
@@ -74,6 +80,7 @@ fn handle_command(line: &str, ctx: &mut AgentContext) {
                     }
                     return;
                 }
+
                 ("train", Statement::Train { body }) => {
                     ctx.set_mem("short", "msg", input_value);
                     for s in body {
@@ -81,6 +88,7 @@ fn handle_command(line: &str, ctx: &mut AgentContext) {
                     }
                     return;
                 }
+
                 ("evolve", Statement::Evolve { body }) => {
                     ctx.set_mem("short", "msg", input_value);
                     for s in body {
@@ -88,6 +96,7 @@ fn handle_command(line: &str, ctx: &mut AgentContext) {
                     }
                     return;
                 }
+
                 _ => {}
             }
         }
