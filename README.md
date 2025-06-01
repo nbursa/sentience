@@ -1,4 +1,4 @@
-# Sentience (v0.2.0)
+# Sentience (v0.1.1)
 
 Sentience is an experimental, AI-native programming language built around:
 - **Memory-first architecture** (`mem.short`, `mem.long`, and potentially `mem.latent`)
@@ -101,37 +101,6 @@ Similarly, use:
 * **`.evolve <some_data>`** – triggers the `evolve { … }` block in the same way.
 
 If the agent does not have a `train` or `evolve` block, REPL will respond with, for example, `Agent has no train block.`
-
----
-
-## Example REPL Session
-
-```text
-$ cargo run
-Sentience REPL v0.1 (Rust)
->>>
->>> agent Echo {
-...   mem short
-...   goal: "Store and reflect input"
-...
-...   on input(msg) {
-...     print "Received->"
-...     reflect { mem.short["msg"] }
-...   }
-... }
-Agent: Echo
-  Init mem: short
-  Goal: "Store and reflect input"
-Agent: Echo [registered]
-
->>> .input hello
-  Received->
-    hello
-
->>> .input world
-  Received->
-    world
-```
 
 ---
 
