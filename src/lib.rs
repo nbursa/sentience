@@ -8,6 +8,7 @@ use context::AgentContext;
 use eval::eval;
 use lexer::Lexer;
 use parser::Parser;
+use std::collections::HashMap;
 use types::Statement;
 
 pub struct SentienceAgent {
@@ -21,7 +22,7 @@ impl SentienceAgent {
         }
     }
 
-    pub async fn run_sentience(&mut self, code: &str) -> Result<String, String> {
+    pub fn run_sentience(&mut self, code: &str) -> Result<String, String> {
         let full_input = code.trim();
         let mut lexer = Lexer::new(full_input);
         let mut parser = Parser::new(&mut lexer);
@@ -48,11 +49,11 @@ impl SentienceAgent {
         self.ctx.set_mem("long", key, value);
     }
 
-    pub fn all_short(&self) -> std::collections::HashMap<String, String> {
+    pub fn all_short(&self) -> HashMap<String, String> {
         self.ctx.mem_short.clone()
     }
 
-    pub fn all_long(&self) -> std::collections::HashMap<String, String> {
+    pub fn all_long(&self) -> HashMap<String, String> {
         self.ctx.mem_long.clone()
     }
 }
