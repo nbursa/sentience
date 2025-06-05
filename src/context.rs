@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use std::fs;
 use std::io;
 
-/// Holds short/long memory and the currently-registered agent.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AgentContext {
     pub mem_short: HashMap<String, String>,
