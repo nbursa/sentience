@@ -33,6 +33,23 @@ impl SentienceAgent {
         Ok(String::new())
     }
 
+    pub fn handle_input(&mut self, input: &str) -> Option<String> {
+        let current_agent = self.ctx.current_agent.clone();
+
+        if let Some(Statement::AgentDeclaration { body, .. }) = current_agent {
+            for stmt in body {
+                if let Statement::OnInput { body, .. } = stmt {
+                    for inner in body {
+                        eval(&inner, "", input, &mut self.ctx);
+                    }
+                    return self.ctx.output.clone();
+                }
+            }
+        }
+
+        None
+    }
+
     pub fn get_short(&self, key: &str) -> String {
         self.ctx.get_mem("short", key)
     }
