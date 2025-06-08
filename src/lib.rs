@@ -30,7 +30,8 @@ impl SentienceAgent {
         for stmt in program.statements {
             eval(&stmt, "", "", &mut self.ctx);
         }
-        Ok(String::new())
+        // Ok(String::new())
+        Ok(self.ctx.output.clone().unwrap_or_default())
     }
 
     pub fn handle_input(&mut self, input: &str) -> Option<String> {
