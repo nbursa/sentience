@@ -9,6 +9,7 @@ use eval::eval;
 use lexer::Lexer;
 use parser::Parser;
 use std::collections::HashMap;
+use tracing::info;
 use types::Statement;
 
 pub struct SentienceAgent {
@@ -35,6 +36,8 @@ impl SentienceAgent {
     }
 
     pub fn handle_input(&mut self, input: &str) -> Option<String> {
+        tracing::info!("handle_input triggered with: {:?}", input);
+
         let current_agent = self.ctx.current_agent.clone();
 
         if let Some(Statement::AgentDeclaration { body, .. }) = current_agent {
@@ -43,10 +46,14 @@ impl SentienceAgent {
                     for inner in body {
                         eval(&inner, "", input, &mut self.ctx);
                     }
+                    tracing::info!("Output after eval: {:?}", self.ctx.output);
+
                     return self.ctx.output.clone();
                 }
             }
         }
+
+        tracing::warn!("No agent or on input block matched.");
 
         None
     }
