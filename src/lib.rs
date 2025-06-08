@@ -9,7 +9,6 @@ use eval::eval;
 use lexer::Lexer;
 use parser::Parser;
 use std::collections::HashMap;
-use tracing::info;
 use types::Statement;
 
 pub struct SentienceAgent {
