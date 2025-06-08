@@ -1,8 +1,16 @@
 use crate::context::AgentContext;
 use crate::types::Statement;
 
+fn eval_expr(expr: &str, input: &str, _ctx: &AgentContext) -> String {
+    if expr == "input" {
+        input.to_string()
+    } else {
+        expr.trim_matches('"').to_string()
+    }
+}
+
 /// Evaluate a single AST statement in the given context.
-pub fn eval(stmt: &Statement, indent: &str, ctx: &mut AgentContext) {
+pub fn eval(stmt: &Statement, indent: &str, input: &str, ctx: &mut AgentContext) {
     match stmt {
         Statement::AgentDeclaration { name, body } => {
             println!("Agent: {}", name);
@@ -25,7 +33,7 @@ pub fn eval(stmt: &Statement, indent: &str, ctx: &mut AgentContext) {
         Statement::Reflect { body } => {
             let nested_indent = format!("{}  ", indent);
             for inner in body.iter() {
-                eval(inner, &nested_indent, ctx);
+                eval(inner, &nested_indent, input, ctx);
             }
         }
         Statement::ReflectAccess { mem_target, key } => {
@@ -45,7 +53,7 @@ pub fn eval(stmt: &Statement, indent: &str, ctx: &mut AgentContext) {
             for v in values.iter() {
                 if current_val.contains(v) {
                     for inner in body.iter() {
-                        eval(inner, indent, ctx);
+                        eval(inner, indent, input, ctx);
                     }
                     break;
                 }
@@ -53,6 +61,16 @@ pub fn eval(stmt: &Statement, indent: &str, ctx: &mut AgentContext) {
         }
         Statement::Print(text) => {
             println!("{}{}", indent, text);
+        }
+        Statement::Assignment(name, expr) => {
+            if name == "output" {
+                let val = eval_expr(expr, input, ctx);
+                ctx.output = Some(val.clone());
+                return;
+            }
+
+            let val = eval_expr(expr, input, ctx);
+            ctx.set_mem("short", name, &val);
         }
     }
 }

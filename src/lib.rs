@@ -9,7 +9,7 @@ use eval::eval;
 use lexer::Lexer;
 use parser::Parser;
 use std::collections::HashMap;
-// use types::Statement;
+use types::Statement;
 
 pub struct SentienceAgent {
     ctx: AgentContext,
@@ -28,7 +28,7 @@ impl SentienceAgent {
         let mut parser = Parser::new(&mut lexer);
         let program = parser.parse_program();
         for stmt in program.statements {
-            eval(&stmt, "", &mut self.ctx);
+            eval(&stmt, "", "", &mut self.ctx);
         }
         Ok(String::new())
     }

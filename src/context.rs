@@ -11,6 +11,9 @@ pub struct AgentContext {
 
     #[serde(skip)]
     pub current_agent: Option<crate::types::Statement>,
+
+    #[serde(skip)]
+    pub output: Option<String>,
 }
 
 impl AgentContext {
@@ -20,6 +23,7 @@ impl AgentContext {
             mem_long: HashMap::new(),
             links: HashMap::new(),
             current_agent: None,
+            output: None,
         }
     }
 

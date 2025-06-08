@@ -39,4 +39,5 @@ pub enum Statement {
         body: Vec<Statement>,
     },
     Print(String),
+    Assignment(String, String),
 }
