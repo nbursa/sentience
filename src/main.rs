@@ -52,7 +52,7 @@ fn main() {
             let mut parser = Parser::new(&mut lexer);
             let program = parser.parse_program();
             for stmt in program.statements {
-                eval(&stmt, "", &mut ctx);
+                eval(&stmt, "", "", &mut ctx);
             }
             buffer.clear();
             print_prompt();
@@ -76,7 +76,7 @@ fn handle_command(line: &str, ctx: &mut AgentContext) {
                 ("input", Statement::OnInput { param, body }) => {
                     ctx.set_mem("short", param, input_value);
                     for s in body {
-                        eval(s, "  ", ctx);
+                        eval(s, "  ", input_value, ctx);
                     }
                     return;
                 }
@@ -84,7 +84,7 @@ fn handle_command(line: &str, ctx: &mut AgentContext) {
                 ("train", Statement::Train { body }) => {
                     ctx.set_mem("short", "msg", input_value);
                     for s in body {
-                        eval(s, "  ", ctx);
+                        eval(s, "  ", input_value, ctx);
                     }
                     return;
                 }
@@ -92,7 +92,7 @@ fn handle_command(line: &str, ctx: &mut AgentContext) {
                 ("evolve", Statement::Evolve { body }) => {
                     ctx.set_mem("short", "msg", input_value);
                     for s in body {
-                        eval(s, "  ", ctx);
+                        eval(s, "  ", input_value, ctx);
                     }
                     return;
                 }
