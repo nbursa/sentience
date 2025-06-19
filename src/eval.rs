@@ -42,6 +42,7 @@ pub fn eval(stmt: &Statement, indent: &str, input: &str, ctx: &mut AgentContext)
                 "long" => ctx.get_mem("long", key),
                 _ => String::new(),
             };
+            ctx.output = Some(val.clone());
             println!("{}{}", indent, val);
         }
         Statement::Train { .. } => {}
