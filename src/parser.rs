@@ -47,7 +47,19 @@ impl<'a> Parser<'a> {
             TokenType::Embed => self.parse_embed(),
             TokenType::If => self.parse_if_context_includes(),
             TokenType::Print => self.parse_print(),
-            _ => None,
+            _ => {
+                if self.cur_token.token_type == TokenType::Ident
+                    && self.peek_token.token_type == TokenType::Equal
+                {
+                    let key = self.cur_token.literal.clone();
+                    self.next_token();
+                    self.next_token();
+                    let value = self.cur_token.literal.clone();
+                    return Some(Statement::Assignment(key, value));
+                }
+
+                None
+            }
         }
     }
 
