@@ -1,13 +1,6 @@
 use crate::context::AgentContext;
 use crate::types::Statement;
 
-// fn eval_expr(expr: &str, input: &str, _ctx: &AgentContext) -> String {
-//     if expr == "input" {
-//         input.to_string()
-//     } else {
-//         expr.trim_matches('"').to_string()
-//     }
-// }
 fn eval_expr(expr: &str, input: &str, _ctx: &AgentContext) -> String {
     match expr.trim() {
         "input" | "msg" => input.to_string(),
