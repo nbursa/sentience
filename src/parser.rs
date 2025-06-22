@@ -58,7 +58,7 @@ impl<'a> Parser<'a> {
                     return Some(Statement::Assignment(key, value));
                 }
 
-                None
+                Some(Statement::Unknown(self.cur_token.literal.clone()))
             }
         }
     }
