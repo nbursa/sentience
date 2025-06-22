@@ -40,4 +40,5 @@ pub enum Statement {
     },
     Print(String),
     Assignment(String, String),
+    Unknown(String),
 }

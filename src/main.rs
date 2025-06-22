@@ -52,7 +52,13 @@ fn main() {
             let mut parser = Parser::new(&mut lexer);
             let program = parser.parse_program();
             for stmt in program.statements {
-                eval(&stmt, "", "", &mut ctx);
+                let mut output = Vec::new();
+                eval(&stmt, "", "", &mut ctx, &mut output);
+                if !output.is_empty() {
+                    for line in output {
+                        println!("{}", line);
+                    }
+                }
             }
             buffer.clear();
             print_prompt();
@@ -75,24 +81,36 @@ fn handle_command(line: &str, ctx: &mut AgentContext) {
             match (cmd, &stmt) {
                 ("input", Statement::OnInput { param, body }) => {
                     ctx.set_mem("short", param, input_value);
+                    let mut output = Vec::new();
                     for s in body {
-                        eval(s, "  ", input_value, ctx);
+                        eval(s, "  ", input_value, ctx, &mut output);
+                    }
+                    for line in output {
+                        println!("{}", line);
                     }
                     return;
                 }
 
                 ("train", Statement::Train { body }) => {
                     ctx.set_mem("short", "msg", input_value);
+                    let mut output = Vec::new();
                     for s in body {
-                        eval(s, "  ", input_value, ctx);
+                        eval(s, "  ", input_value, ctx, &mut output);
+                    }
+                    for line in output {
+                        println!("{}", line);
                     }
                     return;
                 }
 
                 ("evolve", Statement::Evolve { body }) => {
                     ctx.set_mem("short", "msg", input_value);
+                    let mut output = Vec::new();
                     for s in body {
-                        eval(s, "  ", input_value, ctx);
+                        eval(s, "  ", input_value, ctx, &mut output);
+                    }
+                    for line in output {
+                        println!("{}", line);
                     }
                     return;
                 }

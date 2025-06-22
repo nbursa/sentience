@@ -9,30 +9,36 @@ fn eval_expr(expr: &str, input: &str, _ctx: &AgentContext) -> String {
 }
 
 /// Evaluate a single AST statement in the given context.
-pub fn eval(stmt: &Statement, indent: &str, input: &str, ctx: &mut AgentContext) {
+pub fn eval(
+    stmt: &Statement,
+    indent: &str,
+    input: &str,
+    ctx: &mut AgentContext,
+    output: &mut Vec<String>,
+) {
     match stmt {
         Statement::AgentDeclaration { name, body } => {
-            println!("Agent: {}", name);
+            output.push(format!("Agent: {}", name));
             for inner in body.iter() {
                 match inner {
                     Statement::MemDeclaration { target } => {
-                        println!("  Init mem: {}", target);
+                        output.push(format!("  Init mem: {}", target));
                     }
                     Statement::Goal(text) => {
-                        println!("  Goal: \"{}\"", text);
+                        output.push(format!("  Goal: \"{}\"", text));
                     }
                     _ => {}
                 }
             }
             ctx.current_agent = Some(stmt.clone());
-            println!("Agent: {} [registered]", name);
+            output.push(format!("Agent: {} [registered]", name));
         }
         Statement::MemDeclaration { .. } => {}
         Statement::OnInput { .. } => {}
         Statement::Reflect { body } => {
             let nested_indent = format!("{}  ", indent);
             for inner in body.iter() {
-                eval(inner, &nested_indent, input, ctx);
+                eval(inner, &nested_indent, input, ctx, output);
             }
         }
         Statement::ReflectAccess { mem_target, key } => {
@@ -42,7 +48,7 @@ pub fn eval(stmt: &Statement, indent: &str, input: &str, ctx: &mut AgentContext)
                 _ => String::new(),
             };
             ctx.output = Some(val.clone());
-            println!("{}{}", indent, val);
+            output.push(format!("{}{}", indent, val));
         }
         Statement::Train { .. } => {}
         Statement::Evolve { .. } => {}
@@ -53,24 +59,31 @@ pub fn eval(stmt: &Statement, indent: &str, input: &str, ctx: &mut AgentContext)
             for v in values.iter() {
                 if current_val.contains(v) {
                     for inner in body.iter() {
-                        eval(inner, indent, input, ctx);
+                        eval(inner, indent, input, ctx, output);
                     }
                     break;
                 }
             }
         }
         Statement::Print(text) => {
-            println!("{}{}", indent, text);
+            output.push(format!("{}{}", indent, text));
         }
         Statement::Assignment(name, expr) => {
             if name == "output" {
                 let val = eval_expr(expr, input, ctx);
                 ctx.output = Some(val.clone());
+                output.push(val);
                 return;
             }
 
             let val = eval_expr(expr, input, ctx);
             ctx.set_mem("short", name, &val);
         }
+        Statement::Unknown(_) => todo!(),
+    }
+
+    // Handle the case where the statement is not recognized
+    if let Statement::Unknown(text) = stmt {
+        output.push(format!("{}Unknown statement: {}", indent, text));
     }
 }

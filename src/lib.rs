@@ -27,27 +27,28 @@ impl SentienceAgent {
         let mut lexer = Lexer::new(full_input);
         let mut parser = Parser::new(&mut lexer);
         let program = parser.parse_program();
+        let mut output = Vec::new();
         for stmt in program.statements {
-            eval(&stmt, "", "", &mut self.ctx);
+            eval(&stmt, "", "", &mut self.ctx, &mut output);
         }
-        // Ok(String::new())
-        Ok(self.ctx.output.clone().unwrap_or_default())
+        Ok(output.join("\n"))
     }
 
     pub fn handle_input(&mut self, input: &str) -> Option<String> {
         tracing::info!("handle_input triggered with: {:?}", input);
 
         let current_agent = self.ctx.current_agent.clone();
+        let mut output = Vec::new();
 
         if let Some(Statement::AgentDeclaration { body, .. }) = current_agent {
             for stmt in body {
                 if let Statement::OnInput { body, .. } = stmt {
                     for inner in body {
-                        eval(&inner, "", input, &mut self.ctx);
+                        eval(&inner, "", input, &mut self.ctx, &mut output);
                     }
                     tracing::info!("Output after eval: {:?}", self.ctx.output);
 
-                    return self.ctx.output.clone();
+                    return Some(output.join("\n"));
                 }
             }
         }
