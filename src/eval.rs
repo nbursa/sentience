@@ -34,7 +34,12 @@ pub fn eval(
             output.push(format!("Agent: {} [registered]", name));
         }
         Statement::MemDeclaration { .. } => {}
-        Statement::OnInput { .. } => {}
+        Statement::OnInput { param, body } => {
+            ctx.set_mem("short", param, input);
+            for inner in body.iter() {
+                eval(inner, indent, input, ctx, output);
+            }
+        }
         Statement::Reflect { body } => {
             let nested_indent = format!("{}  ", indent);
             for inner in body.iter() {
@@ -79,11 +84,8 @@ pub fn eval(
             let val = eval_expr(expr, input, ctx);
             ctx.set_mem("short", name, &val);
         }
-        Statement::Unknown(_) => todo!(),
-    }
-
-    // Handle the case where the statement is not recognized
-    if let Statement::Unknown(text) = stmt {
-        output.push(format!("{}Unknown statement: {}", indent, text));
+        Statement::Unknown(text) => {
+            output.push(format!("{}Unknown statement: {}", indent, text));
+        }
     }
 }
