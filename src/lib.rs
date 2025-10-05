@@ -4,12 +4,26 @@ pub mod lexer;
 pub mod parser;
 pub mod types;
 
+pub mod sentience_core;
+
+// Python bindings
+pub mod python_bridge;
+
 use context::AgentContext;
 use eval::eval;
 use lexer::Lexer;
 use parser::Parser;
 use std::collections::HashMap;
 use types::Statement;
+
+pub use sentience_core::{
+    ast::{Edge, EdgeType, Field, SentienceToken, SentienceTokenAst, Span, ThoughtType, Value},
+    runtime::{
+        Cortex, ExecutionResult, RefMetrics, RefNet, Runtime, SimpleRuntime, Superego, TokenRef,
+        Verdict,
+    },
+    SentienceCore,
+};
 
 pub struct SentienceAgent {
     ctx: AgentContext,
@@ -81,4 +95,9 @@ impl SentienceAgent {
     pub fn all_long(&self) -> HashMap<String, String> {
         self.ctx.mem_long.clone()
     }
+}
+
+pub fn create_sentience_core() -> SentienceCore {
+    let runtime = Box::new(SimpleRuntime::new());
+    SentienceCore::new(runtime)
 }
