@@ -18,10 +18,10 @@ Sentience provides a complete implementation of the Sentience DSL specification,
 ## Architecture
 
 ```text
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Sentience     │     │   Sentience      │     │   Token         │
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Sentience     │    │   Sentience      │    │   Token         │
 │   DSL Code      │───▶│   Engine         │───▶│   Generation    │
-└─────────────────┘     └──────────────────┘     └─────────────────┘
+└─────────────────┘    └──────────────────┘    └─────────────────┘
                                 │
                                 ▼
                        ┌──────────────────┐
