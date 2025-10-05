@@ -1,81 +1,78 @@
-# Sentience Core - SRAI Integration
+# Sentience
 
-A SRAI-compliant implementation of the Sentience DSL with full integration to RefNet, Cortex, and Superego components.
+A structured language of thought for cognitive AI systems, with deterministic token processing and reflection capabilities.
 
 ## Overview
 
-Sentience Core provides a production-ready implementation of the Sentience DSL as specified in the SRAI research papers. It includes:
+Sentience provides a complete implementation of the Sentience DSL specification, enabling structured cognitive processing through deterministic token generation, symbolic embeddings, and reflection capabilities.
 
-- **Deterministic token processing** with canonical AST and SHA-256 hashing
-- **Symbolic embeddings** (ℝ^256) for semantic search and recall
-- **RefNet integration** for cognitive evaluation (valence, SMD, quality)
-- **Superego gating** for alignment and safety
-- **Cortex memory** with append-only token storage and graph relations
-- **Complete pipeline**: Parse → Canonicalize → Hash → Embed → Execute → RefNet → Superego → Cortex
+### Key Features
+
+- **Deterministic Token Processing**: Canonical AST → Hash → Embed → Execute pipeline
+- **Symbolic Embeddings**: 256-dimensional deterministic vector generation for semantic operations
+- **Reflection Engine**: Built-in cognitive reflection and meta-cognitive operations
+- **Python Integration**: PyO3 bindings for seamless Python usage
+- **Cross-Platform**: Works on macOS, Linux, and Windows
+- **Production Ready**: Comprehensive testing and documentation
 
 ## Architecture
 
 ```text
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Sentience     │    │      SRAI        │    │    RefNet       │
-│   DSL Code      │───▶│   Integration    │───▶│   Evaluation    │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   Sentience     │     │   Sentience      │     │   Token         │
+│   DSL Code      │───▶│   Engine         │───▶│   Generation    │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
                                 │
                                 ▼
                        ┌──────────────────┐
-                       │    Cortex        │
-                       │   Memory +       │
-                       │   Graph Store    │
+                       │   Deterministic  │
+                       │   Processing     │
+                       │   Pipeline       │
                        └──────────────────┘
 ```
 
 ## Quick Start
 
-### 1. Build the Extension
+### Installation
 
 ```bash
-# Build Rust library and Python extension
-make build
+# Install from source
+pip install .
 
-# Or install in development mode
-make dev
+# Or build locally
+make install
 ```
 
-### 2. Basic Usage
+### Basic Usage
 
 ```python
-from sentience_core.srai_integration import create_sentience_agent
+import sentience_core
 
-# Create agent with SRAI components
-agent = create_sentience_agent()
+# Create Sentience instance
+core = sentience_core.create_sentience_core()
 
-# Execute Sentience DSL
-result = agent.think("""
-    embed "I need to solve this problem" -> percept.text
-    reflect {
-        recall ltm[similar: "problem", k=5]
-        reframe "analyze_and_solve"
-        consolidate
-    }
-""")
+# Process Sentience DSL
+result = core.process_step('embed "hello world" -> percept.text')
 
-print(f"Quality: {result.metrics.quality:.3f}")
-print(f"Generated {len(result.srai_tokens)} tokens")
+print(f"Token ID: {result.token_id()}")
+print(f"Embedding dimension: {len(result.embedding())}")
 ```
 
-### 3. Run Demos
+### Rust Usage
 
-```bash
-# Rust demo
-make demo-rust
+```rust
+use sentience_core::{SentienceCore, SimpleRuntime};
 
-# Python integration demo
-make demo-python
+let runtime = Box::new(SimpleRuntime::new());
+let mut core = SentienceCore::new(runtime);
+
+let result = core.process_step("embed test -> percept.text");
+println!("Generated token: {}", result.token_id.unwrap());
 ```
 
-## Sentience DSL Syntax
+## Sentience DSL
 
-The Sentience DSL supports the following constructs:
+The Sentience DSL is a structured language for expressing cognitive operations:
 
 ### Agent Declaration
 
@@ -91,6 +88,7 @@ agent ProblemSolver {
 ```sentience
 embed "user input" -> percept.text
 embed audio_data -> percept.audio
+embed visual_data -> percept.vision
 ```
 
 ### Reflection Operations
@@ -110,74 +108,93 @@ set mem.short["key"] = "value"
 recall ltm[similar: query, k=10, since="2024-01-01"]
 ```
 
+## Token Types
+
+Sentience supports several token types:
+
+- **Percept**: Sensory input (text, audio, visual)
+- **Reflection**: Meta-cognitive operations
+- **Action**: Behavioral outputs
+- **Concept**: Abstract knowledge representations
+- **SelfModel**: Self-awareness and identity
+
 ## API Reference
 
-### SentienceAgent
-
-Main interface for executing Sentience DSL with SRAI integration.
+### Python API
 
 ```python
-class SentienceAgent:
-    def think(self, dsl_code: str) -> SentienceExecutionResult
-    def reflect_on_input(self, input_text: str) -> SentienceExecutionResult
-    def get_memory_stats(self) -> Dict[str, Any]
+# Core functionality
+core = sentience_core.create_sentience_core()
+result = core.process_step(dsl_code)
+
+# Token operations
+ast = core.parse(dsl_code)
+canonical = core.canonicalize(ast)
+token_id = core.hash(canonical)
+embedding = core.embed(canonical)
 ```
 
-### SentienceExecutionResult
+### Rust API
 
-Result of Sentience execution containing both Sentience and SRAI tokens.
+```rust
+use sentience_core::{
+    SentienceCore, SimpleRuntime,
+    ast::{SentienceTokenAst, ThoughtType, Value},
+    runtime::ExecutionResult
+};
+
+let runtime = Box::new(SimpleRuntime::new());
+let mut core = SentienceCore::new(runtime);
+
+// Process DSL
+let result = core.process_step("embed test -> percept.text");
+
+// Individual operations
+let ast = core.parse("embed test -> percept.text")?;
+let canonical = core.canonicalize(&ast);
+let token_id = core.hash(&canonical);
+let embedding = core.embed(&canonical);
+```
+
+## Deterministic Processing
+
+Sentience ensures deterministic behavior:
+
+- **Canonical AST**: Normalized token structure with sorted fields
+- **SHA-256 Hashing**: Deterministic token IDs (`mem_` prefix)
+- **Symbolic Embeddings**: Fixed-seed vector generation
+- **Reproducible Results**: Same input → identical output across runs
+
+## Integration Options
+
+### Standalone Usage
+
+Use Sentience independently for cognitive processing:
 
 ```python
-@dataclass
-class SentienceExecutionResult:
-    token_id: Optional[str]
-    embedding: Optional[np.ndarray]
-    metrics: Optional[SentienceRefNetMetrics]
-    tokens: List[Dict[str, Any]]  # Sentience tokens
-    edges: List[Dict[str, Any]]  # Sentience edges
-    srai_tokens: List[SentienceToken]  # SRAI tokens
-    srai_edges: List[Edge]  # SRAI edges
+core = sentience_core.create_sentience_core()
+result = core.process_step("""
+    embed "I need to understand this" -> percept.text
+    reflect {
+        recall ltm[similar: "understanding", k=3]
+        reframe "analyze_and_synthesize"
+    }
+""")
 ```
 
-### RefNet Metrics
+### SRAI Integration
 
-Cognitive evaluation metrics from RefNet.
+Sentience is designed to integrate with SRAI (Structured Reflective AI):
 
 ```python
-@dataclass
-class SentienceRefNetMetrics:
-    valence: float      # Emotional valence (-1 to 1)
-    smd: float          # Self-Model Drift (0 to 1)
-    quality: float      # Reflection quality (0 to 1)
-    next_action: str    # Recommended next action
-    action_logits: Dict[str, float]  # Action probabilities
+from srai import SRAISentienceCore, Cortex, RefNet
+
+cortex = Cortex()
+refnet = RefNet()
+integration = SRAISentienceCore(cortex, refnet)
+
+result = integration.process_dsl("embed test -> percept.text")
 ```
-
-## Integration with SRAI
-
-### Cortex Memory
-
-Sentience tokens are automatically committed to Cortex with:
-
-- Vector embeddings for semantic search
-- Graph edges for structural relations
-- Provenance tracking (stm_ids, refnet_id, rules_applied)
-
-### RefNet Evaluation
-
-Every reflection is evaluated by RefNet to provide:
-
-- Quality assessment for Superego gating
-- Valence and SMD metrics for alignment
-- Next action recommendations
-
-### Superego Gating
-
-Tokens are filtered through Superego rules:
-
-- Quality thresholds (default: ≥0.6)
-- Alignment checks
-- Safety constraints
 
 ## Development
 
@@ -186,7 +203,7 @@ Tokens are filtered through Superego rules:
 ```text
 src/
 ├── lib.rs                    # Main Rust library
-├── sentience_core/          # SRAI-compliant implementation
+├── sentience_core/          # Core implementation
 │   ├── mod.rs              # Core API
 │   ├── ast.rs              # Token AST definitions
 │   ├── canonicalizer.rs    # Deterministic normalization
@@ -195,26 +212,29 @@ src/
 │   ├── runtime.rs          # Runtime traits
 │   └── parser.rs           # DSL parser
 ├── python_bridge.rs        # PyO3 Python bindings
-└── context.rs              # Original REPL (kept for compatibility)
+└── main.rs                 # REPL interface
 
 python/
 └── sentience_core/
     ├── __init__.py
-    └── srai_integration.py  # SRAI integration module
+    └── srai_integration.py  # Optional SRAI integration
 
 examples/
 ├── sentience_core_demo.rs  # Rust demo
-└── srai_sentience_integration.py  # Python integration demo
+└── srai_sentience_integration.py  # SRAI integration demo
 ```
 
 ### Building from Source
 
 ```bash
-# Install dependencies
-pip install pyo3-setuptools-rust numpy
+# Install Rust dependencies
+cargo build
 
-# Build extension
-python setup.py build_ext --inplace
+# Install Python dependencies
+pip install maturin numpy
+
+# Build Python extension
+maturin build --release
 
 # Or use make
 make build
@@ -223,72 +243,68 @@ make build
 ### Testing
 
 ```bash
+# Run Rust tests
+cargo test
+
+# Run Python tests
+python test_srai_integration.py
+
 # Run all tests
 make test
-
-# Run specific tests
-cargo test
-python -m pytest tests/
 ```
 
 ## Examples
 
-### Basic Reflection
+### Basic Token Processing
 
 ```python
-agent = create_sentience_agent()
-result = agent.reflect_on_input("I need to understand this concept")
+import sentience_core
 
-print(f"Quality: {result.metrics.quality:.3f}")
-print(f"Next action: {result.metrics.next_action}")
+core = sentience_core.create_sentience_core()
+
+# Process different token types
+percept_result = core.process_step('embed "hello" -> percept.text')
+reflection_result = core.process_step('reflect { recall; reframe; consolidate }')
+agent_result = core.process_step('agent TestAgent { mem short }')
+
+print(f"Percept ID: {percept_result.token_id()}")
+print(f"Reflection ID: {reflection_result.token_id()}")
+print(f"Agent ID: {agent_result.token_id()}")
 ```
 
-### Complex Cognitive Processing
+### Deterministic Behavior
 
 ```python
-dsl_code = """
-agent Analyst {
-    mem short
-    goal: "Analyze complex topics systematically"
-    
-    on input(topic) {
-        embed topic -> percept.text
-        
-        reflect {
-            recall ltm[similar: topic, k=10]
-            reframe "analyze_and_synthesize"
-            consolidate
-        }
-        
-        reflect {
-            recall ltm[similar: "related_concepts", k=5]
-            reframe "connect_and_integrate"
-            consolidate
-        }
-    }
+# Same input produces identical results
+result1 = core.process_step('embed test -> percept.text')
+result2 = core.process_step('embed test -> percept.text')
+
+assert result1.token_id() == result2.token_id()
+assert result1.embedding() == result2.embedding()
+```
+
+### Custom Runtime
+
+```rust
+use sentience_core::runtime::{Runtime, Cortex, RefNet, Superego};
+
+struct MyRuntime {
+    // Custom implementation
 }
-"""
 
-result = agent.think(dsl_code)
-```
-
-### Memory Examples
-
-```python
-# Add memories
-agent.reflect_on_input("I learned that systematic thinking helps")
-agent.reflect_on_input("Pattern recognition is crucial")
-
-# Test recall
-result = agent.reflect_on_input("What have I learned about thinking?")
+impl Runtime for MyRuntime {
+    fn cortex(&mut self) -> &mut dyn Cortex { /* ... */ }
+    fn refnet(&mut self) -> &mut dyn RefNet { /* ... */ }
+    fn superego(&mut self) -> &mut dyn Superego { /* ... */ }
+}
 ```
 
 ## Performance
 
-- **Deterministic**: Same input → identical token IDs across runs
-- **Fast**: Rust implementation with Python bindings
-- **Memory efficient**: Append-only storage with compaction
-- **Scalable**: Supports large token graphs and long-term memory
+- **Fast**: Rust implementation with optimized processing
+- **Memory Efficient**: Minimal memory footprint
+- **Deterministic**: Reproducible results across platforms
+- **Scalable**: Handles large token graphs efficiently
 
 ## Contributing
 
@@ -304,6 +320,5 @@ MIT License - see LICENSE file for details.
 
 ## References
 
-- [SRAI Architecture Documentation](../../SRAI/docs/)
-- [Sentience DSL Specification](../../SRAI/docs/papers/Sentience__Reflective_Executable_Language_for_Structured_Thought_and_Memory_in_Cognitive_AI_Systems.pdf)
-- [RefNet Model Documentation](../../SRAI/docs/05_REFNET_SPEC.md)
+- [Sentience DSL Specification](docs/Sentience__Reflective_Executable_Language_for_Structured_Thought_and_Memory_in_Cognitive_AI_Systems.pdf)
+- [SRAI Architecture](https://github.com/nbursa/srai) (optional integration)
