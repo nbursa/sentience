@@ -317,8 +317,3 @@ impl Runtime for MyRuntime {
 ## License
 
 MIT License - see LICENSE file for details.
-
-## References
-
-- [Sentience DSL Specification](docs/Sentience__Reflective_Executable_Language_for_Structured_Thought_and_Memory_in_Cognitive_AI_Systems.pdf)
-- [SRAI Architecture](https://github.com/nbursa/srai) (optional integration)
