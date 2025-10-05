@@ -15,7 +15,7 @@ Sentience Core provides a production-ready implementation of the Sentience DSL a
 
 ## Architecture
 
-```
+```text
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Sentience     │    │      SRAI        │    │    RefNet       │
 │   DSL Code      │───▶│   Integration    │───▶│   Evaluation    │
@@ -78,6 +78,7 @@ make demo-python
 The Sentience DSL supports the following constructs:
 
 ### Agent Declaration
+
 ```sentience
 agent ProblemSolver {
     mem short
@@ -86,12 +87,14 @@ agent ProblemSolver {
 ```
 
 ### Percept Creation
+
 ```sentience
 embed "user input" -> percept.text
 embed audio_data -> percept.audio
 ```
 
 ### Reflection Operations
+
 ```sentience
 reflect {
     recall ltm[similar: "topic", k=5]
@@ -101,6 +104,7 @@ reflect {
 ```
 
 ### Memory Operations
+
 ```sentience
 set mem.short["key"] = "value"
 recall ltm[similar: query, k=10, since="2024-01-01"]
@@ -154,6 +158,7 @@ class SentienceRefNetMetrics:
 ### Cortex Memory
 
 Sentience tokens are automatically committed to Cortex with:
+
 - Vector embeddings for semantic search
 - Graph edges for structural relations
 - Provenance tracking (stm_ids, refnet_id, rules_applied)
@@ -161,6 +166,7 @@ Sentience tokens are automatically committed to Cortex with:
 ### RefNet Evaluation
 
 Every reflection is evaluated by RefNet to provide:
+
 - Quality assessment for Superego gating
 - Valence and SMD metrics for alignment
 - Next action recommendations
@@ -168,6 +174,7 @@ Every reflection is evaluated by RefNet to provide:
 ### Superego Gating
 
 Tokens are filtered through Superego rules:
+
 - Quality thresholds (default: ≥0.6)
 - Alignment checks
 - Safety constraints
@@ -176,7 +183,7 @@ Tokens are filtered through Superego rules:
 
 ### Project Structure
 
-```
+```text
 src/
 ├── lib.rs                    # Main Rust library
 ├── sentience_core/          # SRAI-compliant implementation
@@ -265,7 +272,7 @@ agent Analyst {
 result = agent.think(dsl_code)
 ```
 
-### Memory Operations
+### Memory Examples
 
 ```python
 # Add memories
